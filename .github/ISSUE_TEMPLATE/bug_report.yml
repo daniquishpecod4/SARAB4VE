@@ -1,0 +1,59 @@
+name: 🐛 Reportar un error
+description: Avisa de algo que no funciona como debería
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por reportar! Mientras más claro sea, más rápido lo arreglamos.
+
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: ¿Qué pasó?
+      description: Describe el error con tus palabras.
+      placeholder: Al tocar el botón SOS, la app se queda cargando y no envía nada.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      description: ¿Qué hiciste, paso a paso, antes de que ocurriera?
+      placeholder: |
+        1. Entré a la pantalla principal
+        2. Toqué "Necesito ayuda"
+        3. Llené el formulario
+        4. Toqué "Enviar" y...
+    validations:
+      required: true
+
+  - type: textarea
+    id: esperado
+    attributes:
+      label: ¿Qué esperabas que pasara?
+      placeholder: Esperaba que se enviara la solicitud y apareciera un mensaje de confirmación.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dispositivo
+    attributes:
+      label: ¿Dónde ocurrió?
+      options:
+        - Computadora (navegador web)
+        - Teléfono Android
+        - iPhone / iPad
+        - No estoy seguro
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Captura de pantalla o información extra (opcional)
+      description: Arrastra aquí una imagen si la tienes.
+    validations:
+      required: false

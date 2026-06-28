@@ -1,0 +1,9 @@
+# Desactiva los issues en blanco: obliga a usar las plantillas (más orden)
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Preguntas y conversación
+    url: https://github.com/daniquishpecod4/SARAB4VE/discussions
+    about: Para dudas generales o ideas en discusión, usa Discussions en vez de un issue.
+  - name: 🔒 Reportar un problema de seguridad
+    url: https://github.com/daniquishpecod4/SARAB4VE/security/policy
+    about: Por favor NO abras un issue público para fallos de seguridad. Mira nuestra política.

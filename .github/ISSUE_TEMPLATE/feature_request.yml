@@ -1,0 +1,48 @@
+name: 💡 Proponer una idea o mejora
+description: Sugiere una nueva funcionalidad o una mejora
+title: "[IDEA]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Las buenas ideas mueven el proyecto! Cuéntanos la tuya.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: ¿Qué problema resuelve tu idea?
+      description: Describe la necesidad real detrás de la propuesta.
+      placeholder: Las personas mayores no saben si su solicitud ya fue vista por un voluntario.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solucion
+    attributes:
+      label: ¿Qué propones?
+      description: Describe tu idea con tus palabras.
+      placeholder: Mostrar un estado tipo "Visto por 3 voluntarios" en la solicitud.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: ¿A qué parte de SARA pertenece?
+      options:
+        - Botón SOS / Solicitudes
+        - Mapa
+        - Voluntarios
+        - Registro / Perfil
+        - Notificaciones
+        - Otra / No estoy seguro
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Algo más que quieras agregar (opcional)
+    validations:
+      required: false
