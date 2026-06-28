@@ -1,5 +1,5 @@
 # SARA
-## Sistema de Apoyo y Respuesta Accesible
+## Sistema de Apoyo y Respuesta Accesible  (Emergencias)
 
 SARA es una plataforma desarrollada para responder a emergencias y desastres naturales mediante la coordinación rápida de ayuda entre ciudadanos, voluntarios, organizaciones y organismos de respuesta.
 
