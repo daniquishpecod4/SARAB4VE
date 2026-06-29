@@ -11,6 +11,8 @@ const NEED_TYPES = [
 
 const URGENCY_LEVELS = ["low", "medium", "high", "critical"];
 const REQUEST_STATUSES = ["open", "assigned", "resolved"];
+const DEFAULT_RADIUS_KM = 10;
+const MAX_RADIUS_KM = 100;
 
 const NEED_TYPE_SET = new Set(NEED_TYPES);
 const URGENCY_LEVEL_SET = new Set(URGENCY_LEVELS);
@@ -22,6 +24,18 @@ function isBlank(value) {
 
 function isFiniteNumber(value) {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function toNumber(value) {
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value !== "string" || value.trim() === "") {
+    return Number.NaN;
+  }
+
+  return Number(value);
 }
 
 function normalizeHelpRequest(payload) {
@@ -78,7 +92,67 @@ function validateHelpRequest(payload) {
   };
 }
 
+function validateHelpRequestSearchParams(query) {
+  const errors = [];
+  const hasLatitude = query.latitude !== undefined;
+  const hasLongitude = query.longitude !== undefined;
+  const hasRadius = query.radiusKm !== undefined;
+  const hasGeoFilter = hasLatitude || hasLongitude || hasRadius;
+
+  if (query.status && !REQUEST_STATUS_SET.has(query.status)) {
+    errors.push("status is invalid");
+  }
+
+  if (!hasGeoFilter) {
+    return {
+      isValid: errors.length === 0,
+      errors,
+      filters: {
+        hasGeoFilter: false,
+        latitude: null,
+        longitude: null,
+        radiusKm: null,
+        status: query.status || null,
+      },
+    };
+  }
+
+  if (!hasLatitude || !hasLongitude) {
+    errors.push("latitude and longitude are required together");
+  }
+
+  const latitude = hasLatitude ? toNumber(query.latitude) : null;
+  const longitude = hasLongitude ? toNumber(query.longitude) : null;
+  const radiusKm = hasRadius ? toNumber(query.radiusKm) : DEFAULT_RADIUS_KM;
+
+  if (hasLatitude && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90)) {
+    errors.push("latitude must be a valid coordinate");
+  }
+
+  if (hasLongitude && (!Number.isFinite(longitude) || longitude < -180 || longitude > 180)) {
+    errors.push("longitude must be a valid coordinate");
+  }
+
+  if (!Number.isFinite(radiusKm) || radiusKm <= 0 || radiusKm > MAX_RADIUS_KM) {
+    errors.push(`radiusKm must be between 0 and ${MAX_RADIUS_KM}`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    filters: {
+      hasGeoFilter: true,
+      latitude,
+      longitude,
+      radiusKm,
+      status: query.status || null,
+    },
+  };
+}
+
 module.exports = {
+  DEFAULT_RADIUS_KM,
+  MAX_RADIUS_KM,
   NEED_TYPES,
   URGENCY_LEVELS,
   REQUEST_STATUSES,
@@ -87,4 +161,5 @@ module.exports = {
   REQUEST_STATUS_SET,
   normalizeHelpRequest,
   validateHelpRequest,
+  validateHelpRequestSearchParams,
 };
