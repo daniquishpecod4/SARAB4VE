@@ -26,7 +26,7 @@ function buildListHelpRequestsQuery(filters) {
   if (!filters.hasGeoFilter) {
     let sql = `
       SELECT id, requester_name, contact_method, contact_value, need_type, description,
-             latitude, longitude, urgency, status, created_at
+             latitude, longitude, urgency, status, assigned_at, resolved_at, created_at
       FROM help_requests
     `;
 
@@ -49,10 +49,10 @@ function buildListHelpRequestsQuery(filters) {
   const distanceExpression = buildDistanceExpression(latitudeIndex, longitudeIndex);
   const whereClause = baseConditions.length > 0 ? `WHERE ${baseConditions.join(" AND ")}` : "";
 
-  const sql = `
+    const sql = `
     WITH scoped_help_requests AS (
       SELECT id, requester_name, contact_method, contact_value, need_type, description,
-             latitude, longitude, urgency, status, created_at,
+             latitude, longitude, urgency, status, assigned_at, resolved_at, created_at,
              ROUND((${distanceExpression})::numeric, 3) AS "distanceKm"
       FROM help_requests
       ${whereClause}
