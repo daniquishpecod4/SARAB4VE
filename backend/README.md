@@ -40,6 +40,7 @@ npm start
 - `GET /health`
 - `GET /api/help-requests`
 - `POST /api/help-requests`
+- `POST /api/help-requests/:id/accept`
 
 ## Geolocalizacion en listado
 
@@ -62,6 +63,27 @@ Ejemplo:
 ```http
 GET /api/help-requests?status=open&latitude=10.4806&longitude=-66.9036&radiusKm=10
 ```
+
+## Aceptar solicitud
+
+`POST /api/help-requests/:id/accept` acepta una solicitud solo si sigue en estado `open`.
+
+Payload:
+
+```json
+{
+  "volunteerName": "Luis Perez",
+  "volunteerContactMethod": "phone",
+  "volunteerContactValue": "+584121112233"
+}
+```
+
+Respuestas:
+
+- `200` si la solicitud se asigna correctamente
+- `400` si el `id` o el payload son invalidos
+- `404` si la solicitud no existe
+- `409` si la solicitud ya no esta disponible
 
 ## Ejemplo de payload
 

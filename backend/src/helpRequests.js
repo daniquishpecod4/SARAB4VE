@@ -38,6 +38,13 @@ function toNumber(value) {
   return Number(value);
 }
 
+function isUuid(value) {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  );
+}
+
 function normalizeHelpRequest(payload) {
   return {
     requesterName: payload.requesterName.trim(),
@@ -150,6 +157,35 @@ function validateHelpRequestSearchParams(query) {
   };
 }
 
+function normalizeHelpRequestAcceptance(payload) {
+  return {
+    volunteerName: payload.volunteerName.trim(),
+    volunteerContactMethod: payload.volunteerContactMethod.trim(),
+    volunteerContactValue: payload.volunteerContactValue.trim(),
+  };
+}
+
+function validateHelpRequestAcceptance(payload) {
+  const errors = [];
+
+  if (isBlank(payload.volunteerName)) {
+    errors.push("volunteerName is required");
+  }
+
+  if (isBlank(payload.volunteerContactMethod)) {
+    errors.push("volunteerContactMethod is required");
+  }
+
+  if (isBlank(payload.volunteerContactValue)) {
+    errors.push("volunteerContactValue is required");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
 module.exports = {
   DEFAULT_RADIUS_KM,
   MAX_RADIUS_KM,
@@ -159,7 +195,10 @@ module.exports = {
   NEED_TYPE_SET,
   URGENCY_LEVEL_SET,
   REQUEST_STATUS_SET,
+  isUuid,
   normalizeHelpRequest,
+  normalizeHelpRequestAcceptance,
   validateHelpRequest,
+  validateHelpRequestAcceptance,
   validateHelpRequestSearchParams,
 };
