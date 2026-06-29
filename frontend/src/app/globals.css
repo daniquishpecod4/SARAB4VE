@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ── Fuentes ── */
+  --font-sans: var(--font-sara), 'Atkinson Hyperlegible', system-ui, sans-serif;
+
+  /* ── Colores SARA Design System ── */
+  --color-primary:                    #0040a1;
+  --color-primary-container:          #0056d2;
+  --color-on-primary:                 #ffffff;
+  --color-on-primary-container:       #ccd8ff;
+  --color-primary-fixed:              #dae2ff;
+  --color-primary-fixed-dim:          #b2c5ff;
+  --color-inverse-primary:            #b2c5ff;
+
+  --color-secondary:                  #a83900;
+  --color-secondary-container:        #fc6018;
+  --color-on-secondary:               #ffffff;
+  --color-on-secondary-container:     #531800;
+  --color-secondary-fixed:            #ffdbcf;
+  --color-secondary-fixed-dim:        #ffb59a;
+
+  --color-tertiary:                   #822800;
+  --color-tertiary-container:         #a93802;
+  --color-on-tertiary:                #ffffff;
+  --color-on-tertiary-container:      #ffcebd;
+
+  --color-error:                      #ba1a1a;
+  --color-error-container:            #ffdad6;
+  --color-on-error:                   #ffffff;
+  --color-on-error-container:         #93000a;
+
+  --color-background:                 #fcf9f8;
+  --color-on-background:              #1c1b1b;
+  --color-surface:                    #fcf9f8;
+  --color-surface-dim:                #dcd9d9;
+  --color-surface-bright:             #fcf9f8;
+  --color-surface-container-lowest:   #ffffff;
+  --color-surface-container-low:      #f6f3f2;
+  --color-surface-container:          #f0edec;
+  --color-surface-container-high:     #ebe7e7;
+  --color-surface-container-highest:  #e5e2e1;
+  --color-on-surface:                 #1c1b1b;
+  --color-on-surface-variant:         #424654;
+  --color-inverse-surface:            #313030;
+  --color-inverse-on-surface:         #f3f0ef;
+  --color-surface-variant:            #e5e2e1;
+  --color-surface-tint:               #0056d2;
+  --color-outline:                    #737785;
+  --color-outline-variant:            #c3c6d6;
+
+  /* ── Border radius ── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  28px;
+  --radius-full: 9999px;
+
+  /* ── Sombras ── */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+}
+
+/* ── Base ── */
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Material Symbols ── */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  user-select: none;
+}
+
+/* ── Touch targets mínimos accesibles ── */
+a, button {
+  min-height: 48px;
+}
+
+/* ── Focus visible (accesibilidad teclado) ── */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
