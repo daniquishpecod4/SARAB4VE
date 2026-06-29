@@ -29,6 +29,12 @@ createdb sara
 psql "$DATABASE_URL" -f sql/schema.sql
 ```
 
+Si vas a usar Supabase, puedes apuntar `DATABASE_URL` al pooler y saltarte la base local:
+
+```bash
+DATABASE_URL=postgresql://postgres.svvdcvjtytfsuqeveyza:<password>@aws-1-us-east-2.pooler.supabase.com:5432/postgres
+```
+
 4. Arranca la API:
 
 ```bash
