@@ -1,0 +1,4 @@
+node_modules/
+.codebase-memory/
+.env
+backend/.env
