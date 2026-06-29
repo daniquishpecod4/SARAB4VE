@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { buildListHelpRequestsQuery } = require("../src/helpRequests/query");
 const {
   DEFAULT_RADIUS_KM,
   isUuid,
@@ -141,4 +142,19 @@ test("acceptance payload normalizes volunteer fields", () => {
 test("uuid validator accepts standard uuid and rejects junk", () => {
   assert.equal(isUuid("550e8400-e29b-41d4-a716-446655440000"), true);
   assert.equal(isUuid("not-a-uuid"), false);
+});
+
+test("builds geo query with one distance calculation source", () => {
+  const result = buildListHelpRequestsQuery({
+    hasGeoFilter: true,
+    latitude: 10.4806,
+    longitude: -66.9036,
+    radiusKm: 10,
+    status: "open",
+  });
+
+  assert.match(result.sql, /WITH scoped_help_requests AS/);
+  assert.match(result.sql, /ROUND\(\(/);
+  assert.match(result.sql, /WHERE "distanceKm" <= \$4/);
+  assert.deepEqual(result.values, ["open", 10.4806, -66.9036, 10]);
 });

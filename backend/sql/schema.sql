@@ -15,30 +15,75 @@ CREATE TABLE IF NOT EXISTS help_requests (
   volunteer_contact_method TEXT,
   volunteer_contact_value TEXT,
   assigned_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CHECK (need_type IN (
-    'equipment',
-    'medication',
-    'transport',
-    'companionship',
-    'interpreter',
-    'accessible_information',
-    'neurodivergent_support',
-    'psychosocial_support'
-  )),
-  CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
-  CHECK (status IN ('open', 'assigned', 'resolved')),
-  CHECK (latitude >= -90 AND latitude <= 90),
-  CHECK (longitude >= -180 AND longitude <= 180),
-  CHECK (
-    (status = 'open' AND volunteer_name IS NULL AND volunteer_contact_method IS NULL
-      AND volunteer_contact_value IS NULL AND assigned_at IS NULL)
-    OR
-    (status IN ('assigned', 'resolved') AND volunteer_name IS NOT NULL
-      AND volunteer_contact_method IS NOT NULL AND volunteer_contact_value IS NOT NULL
-      AND assigned_at IS NOT NULL)
-  )
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE help_requests
+  ADD COLUMN IF NOT EXISTS volunteer_name TEXT,
+  ADD COLUMN IF NOT EXISTS volunteer_contact_method TEXT,
+  ADD COLUMN IF NOT EXISTS volunteer_contact_value TEXT,
+  ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_need_type_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_need_type_check CHECK (need_type IN (
+        'equipment',
+        'medication',
+        'transport',
+        'companionship',
+        'interpreter',
+        'accessible_information',
+        'neurodivergent_support',
+        'psychosocial_support'
+      ));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_urgency_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_urgency_check CHECK (urgency IN ('low', 'medium', 'high', 'critical'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_status_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_status_check CHECK (status IN ('open', 'assigned', 'resolved'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_latitude_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_latitude_check CHECK (latitude >= -90 AND latitude <= 90);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_longitude_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_longitude_check CHECK (longitude >= -180 AND longitude <= 180);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_assignment_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_assignment_check CHECK (
+        (status = 'open' AND volunteer_name IS NULL AND volunteer_contact_method IS NULL
+          AND volunteer_contact_value IS NULL AND assigned_at IS NULL)
+        OR
+        (status IN ('assigned', 'resolved') AND volunteer_name IS NOT NULL
+          AND volunteer_contact_method IS NOT NULL AND volunteer_contact_value IS NOT NULL
+          AND assigned_at IS NOT NULL)
+      );
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS help_requests_status_idx
   ON help_requests (status);
