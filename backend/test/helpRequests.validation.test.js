@@ -2,8 +2,11 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   DEFAULT_RADIUS_KM,
+  isUuid,
   normalizeHelpRequest,
+  normalizeHelpRequestAcceptance,
   validateHelpRequest,
+  validateHelpRequestAcceptance,
   validateHelpRequestSearchParams,
 } = require("../src/validation/helpRequests");
 
@@ -105,4 +108,37 @@ test("rejects invalid radius and status in geolocation search", () => {
     "status is invalid",
     "radiusKm must be between 0 and 100",
   ]);
+});
+
+test("acceptance payload requires volunteer fields", () => {
+  const result = validateHelpRequestAcceptance({
+    volunteerName: "Luis Perez",
+    volunteerContactMethod: "",
+    volunteerContactValue: "   ",
+  });
+
+  assert.equal(result.isValid, false);
+  assert.deepEqual(result.errors, [
+    "volunteerContactMethod is required",
+    "volunteerContactValue is required",
+  ]);
+});
+
+test("acceptance payload normalizes volunteer fields", () => {
+  const result = normalizeHelpRequestAcceptance({
+    volunteerName: " Luis Perez ",
+    volunteerContactMethod: " phone ",
+    volunteerContactValue: " +584121112233 ",
+  });
+
+  assert.deepEqual(result, {
+    volunteerName: "Luis Perez",
+    volunteerContactMethod: "phone",
+    volunteerContactValue: "+584121112233",
+  });
+});
+
+test("uuid validator accepts standard uuid and rejects junk", () => {
+  assert.equal(isUuid("550e8400-e29b-41d4-a716-446655440000"), true);
+  assert.equal(isUuid("not-a-uuid"), false);
 });

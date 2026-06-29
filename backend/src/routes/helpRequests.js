@@ -1,8 +1,11 @@
 const express = require("express");
 const db = require("../db");
 const {
+  isUuid,
   normalizeHelpRequest,
+  normalizeHelpRequestAcceptance,
   validateHelpRequest,
+  validateHelpRequestAcceptance,
   validateHelpRequestSearchParams,
 } = require("../validation/helpRequests");
 
@@ -123,6 +126,60 @@ router.post("/", async (req, res, next) => {
     );
 
     return res.status(201).json({ data: result.rows[0] });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/:id/accept", async (req, res, next) => {
+  if (!isUuid(req.params.id)) {
+    return res.status(400).json({ errors: ["id must be a valid UUID"] });
+  }
+
+  const validation = validateHelpRequestAcceptance(req.body);
+
+  if (!validation.isValid) {
+    return res.status(400).json({ errors: validation.errors });
+  }
+
+  const payload = normalizeHelpRequestAcceptance(req.body);
+
+  try {
+    const updateResult = await db.query(
+      `
+        UPDATE help_requests
+        SET volunteer_name = $2,
+            volunteer_contact_method = $3,
+            volunteer_contact_value = $4,
+            status = 'assigned',
+            assigned_at = NOW()
+        WHERE id = $1 AND status = 'open'
+        RETURNING id, requester_name, contact_method, contact_value, need_type,
+                  description, latitude, longitude, urgency, status, created_at,
+                  volunteer_name, volunteer_contact_method, volunteer_contact_value, assigned_at
+      `,
+      [
+        req.params.id,
+        payload.volunteerName,
+        payload.volunteerContactMethod,
+        payload.volunteerContactValue,
+      ],
+    );
+
+    if (updateResult.rows.length > 0) {
+      return res.json({ data: updateResult.rows[0] });
+    }
+
+    const existingResult = await db.query(
+      "SELECT status FROM help_requests WHERE id = $1",
+      [req.params.id],
+    );
+
+    if (existingResult.rows.length === 0) {
+      return res.status(404).json({ errors: ["help request not found"] });
+    }
+
+    return res.status(409).json({ errors: ["help request is not open"] });
   } catch (error) {
     return next(error);
   }

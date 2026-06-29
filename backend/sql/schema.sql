@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS help_requests (
   longitude NUMERIC(9, 6) NOT NULL,
   urgency TEXT NOT NULL DEFAULT 'medium',
   status TEXT NOT NULL DEFAULT 'open',
+  volunteer_name TEXT,
+  volunteer_contact_method TEXT,
+  volunteer_contact_value TEXT,
+  assigned_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK (need_type IN (
     'equipment',
@@ -25,7 +29,15 @@ CREATE TABLE IF NOT EXISTS help_requests (
   CHECK (urgency IN ('low', 'medium', 'high', 'critical')),
   CHECK (status IN ('open', 'assigned', 'resolved')),
   CHECK (latitude >= -90 AND latitude <= 90),
-  CHECK (longitude >= -180 AND longitude <= 180)
+  CHECK (longitude >= -180 AND longitude <= 180),
+  CHECK (
+    (status = 'open' AND volunteer_name IS NULL AND volunteer_contact_method IS NULL
+      AND volunteer_contact_value IS NULL AND assigned_at IS NULL)
+    OR
+    (status IN ('assigned', 'resolved') AND volunteer_name IS NOT NULL
+      AND volunteer_contact_method IS NOT NULL AND volunteer_contact_value IS NOT NULL
+      AND assigned_at IS NOT NULL)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS help_requests_status_idx
