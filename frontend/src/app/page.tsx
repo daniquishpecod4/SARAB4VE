@@ -74,7 +74,7 @@ export default function HomePage() {
 
           <div className="flex-shrink-0 w-full max-w-xs lg:max-w-sm">
             <div className="relative z-10 rounded-3xl bg-primary p-8 flex flex-col items-center gap-6 shadow-xl">
-              <span className="material-symbols-rounded text-7xl text-on-primary" aria-hidden="true">emergency_home</span>
+              <img src="/logo.webp" alt="SARA" className="h-20 w-auto brightness-0 invert" />
               <p className="text-on-primary/80 text-center text-sm font-medium">
                 Sistema Autónomo de Respuesta y Asistencia
               </p>

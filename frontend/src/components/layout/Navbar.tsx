@@ -26,9 +26,7 @@ export default function Navbar() {
           className="flex items-center gap-2 text-primary font-bold text-xl min-h-0"
           aria-label="SARA — Ir al inicio"
         >
-          <span className="material-symbols-rounded text-2xl" aria-hidden="true">
-            emergency_home
-          </span>
+          <img src="/logo.webp" alt="SARA" className="h-8 w-auto" />
           <span>SARA</span>
         </Link>
 
