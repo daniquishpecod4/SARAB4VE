@@ -47,6 +47,7 @@ const categories = [
 export default function SOSPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
+  // Step 1 only selects category; Step 2 (`/sos/ubicacion`) will collect details.
 
   return (
     <div className="max-w-3xl mx-auto px-5 lg:px-10 py-8 lg:py-12">
@@ -97,12 +98,17 @@ export default function SOSPage() {
         ))}
       </div>
 
-      {/* Actions */}
+      {/* Actions: navegar a paso 2 (Ubicación y Detalles) */}
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
         <button
-          onClick={() => router.push("/sos/ubicacion")}
-          disabled={!selected}
-          className="flex-1 flex items-center justify-center gap-2 bg-secondary-container text-on-secondary px-6 py-4 rounded-full font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity focus-visible:outline-3 focus-visible:outline-primary"
+          onClick={() => {
+            if (!selected) {
+              alert("Selecciona primero un tipo de necesidad.");
+              return;
+            }
+            router.push(`/sos/location?need_type=${encodeURIComponent(selected)}`);
+          }}
+          className="flex-1 flex items-center justify-center gap-2 bg-secondary-container text-on-secondary px-6 py-4 rounded-full font-bold text-base hover:opacity-90 transition-opacity focus-visible:outline-3 focus-visible:outline-primary"
         >
           Continuar
           <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
