@@ -41,6 +41,28 @@ npm start
 - `GET /api/help-requests`
 - `POST /api/help-requests`
 
+## Geolocalizacion en listado
+
+`GET /api/help-requests` acepta estos query params opcionales:
+
+- `status`: `open`, `assigned`, `resolved`
+- `latitude`
+- `longitude`
+- `radiusKm`
+
+Reglas:
+
+- `latitude` y `longitude` deben enviarse juntos
+- `radiusKm` es opcional y por defecto vale `10`
+- `radiusKm` maximo: `100`
+- cuando hay geofiltro, la respuesta se ordena por cercania e incluye `distanceKm`
+
+Ejemplo:
+
+```http
+GET /api/help-requests?status=open&latitude=10.4806&longitude=-66.9036&radiusKm=10
+```
+
 ## Ejemplo de payload
 
 ```json

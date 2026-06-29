@@ -1,32 +1,81 @@
 const express = require("express");
 const db = require("../db");
 const {
-  REQUEST_STATUS_SET,
   normalizeHelpRequest,
   validateHelpRequest,
+  validateHelpRequestSearchParams,
 } = require("../validation/helpRequests");
 
 const router = express.Router();
 
+function buildDistanceExpression(latitudeIndex, longitudeIndex) {
+  return `
+    6371 * acos(
+      least(
+        1,
+        greatest(
+          -1,
+          cos(radians($${latitudeIndex})) * cos(radians(latitude)) *
+          cos(radians(longitude) - radians($${longitudeIndex})) +
+          sin(radians($${latitudeIndex})) * sin(radians(latitude))
+        )
+      )
+    )
+  `;
+}
+
 router.get("/", async (req, res, next) => {
-  if (req.query.status && !REQUEST_STATUS_SET.has(req.query.status)) {
-    return res.status(400).json({ errors: ["status is invalid"] });
+  const search = validateHelpRequestSearchParams(req.query);
+
+  if (!search.isValid) {
+    return res.status(400).json({ errors: search.errors });
   }
 
   try {
     const values = [];
-    let sql = `
-      SELECT id, requester_name, contact_method, contact_value, need_type, description,
-             latitude, longitude, urgency, status, created_at
-      FROM help_requests
-    `;
+    const conditions = [];
+    let distanceExpression = null;
+    const selectFields = [
+      "id",
+      "requester_name",
+      "contact_method",
+      "contact_value",
+      "need_type",
+      "description",
+      "latitude",
+      "longitude",
+      "urgency",
+      "status",
+      "created_at",
+    ];
+    let orderBy = "created_at DESC";
 
-    if (req.query.status) {
-      values.push(req.query.status);
-      sql += ` WHERE status = $${values.length}`;
+    if (search.filters.status) {
+      values.push(search.filters.status);
+      conditions.push(`status = $${values.length}`);
     }
 
-    sql += " ORDER BY created_at DESC LIMIT 100";
+    if (search.filters.hasGeoFilter) {
+      values.push(search.filters.latitude);
+      const latitudeIndex = values.length;
+      values.push(search.filters.longitude);
+      const longitudeIndex = values.length;
+      values.push(search.filters.radiusKm);
+      const radiusIndex = values.length;
+
+      distanceExpression = buildDistanceExpression(latitudeIndex, longitudeIndex);
+      selectFields.push(`ROUND((${distanceExpression})::numeric, 3) AS "distanceKm"`);
+      conditions.push(`(${distanceExpression}) <= $${radiusIndex}`);
+      orderBy = `"distanceKm" ASC, created_at DESC`;
+    }
+
+    let sql = `SELECT ${selectFields.join(", ")} FROM help_requests`;
+
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    sql += ` ORDER BY ${orderBy} LIMIT 100`;
 
     const result = await db.query(sql, values);
     res.json({ data: result.rows });
