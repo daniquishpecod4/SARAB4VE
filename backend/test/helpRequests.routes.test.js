@@ -109,3 +109,121 @@ test("returns conflict when an open help request was already taken", async () =>
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test("resolves an assigned help request", async () => {
+  const originalQuery = db.query;
+  const queryResults = [
+    {
+      rows: [
+        {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          requester_name: "Ana Perez",
+          contact_method: "phone",
+          contact_value: "+584141234567",
+          need_type: "transport",
+          description: "Necesito llegar a un refugio accesible",
+          latitude: 10.4806,
+          longitude: -66.9036,
+          urgency: "high",
+          status: "resolved",
+          assigned_at: "2026-06-29T12:00:00.000Z",
+          resolved_at: "2026-06-29T12:30:00.000Z",
+          created_at: "2026-06-29T11:00:00.000Z",
+          volunteer_name: "Luis Perez",
+          volunteer_contact_method: "phone",
+          volunteer_contact_value: "+584121112233",
+        },
+      ],
+    },
+  ];
+  db.query = async () => queryResults.shift();
+
+  const server = app.listen(0);
+
+  try {
+    const response = await request(
+      server,
+      "POST",
+      "/api/help-requests/550e8400-e29b-41d4-a716-446655440000/resolve",
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, {
+      data: {
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        requester_name: "Ana Perez",
+        contact_method: "phone",
+        contact_value: "+584141234567",
+        need_type: "transport",
+        description: "Necesito llegar a un refugio accesible",
+        latitude: 10.4806,
+        longitude: -66.9036,
+        urgency: "high",
+        status: "resolved",
+        assigned_at: "2026-06-29T12:00:00.000Z",
+        resolved_at: "2026-06-29T12:30:00.000Z",
+        created_at: "2026-06-29T11:00:00.000Z",
+        volunteer_name: "Luis Perez",
+        volunteer_contact_method: "phone",
+        volunteer_contact_value: "+584121112233",
+      },
+    });
+  } finally {
+    db.query = originalQuery;
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("returns conflict when a help request is not assigned", async () => {
+  const originalQuery = db.query;
+  const queryResults = [
+    { rows: [] },
+    { rows: [{ status: "open" }] },
+  ];
+  db.query = async () => queryResults.shift();
+
+  const server = app.listen(0);
+
+  try {
+    const response = await request(
+      server,
+      "POST",
+      "/api/help-requests/550e8400-e29b-41d4-a716-446655440000/resolve",
+    );
+
+    assert.equal(response.statusCode, 409);
+    assert.deepEqual(response.body, {
+      errors: ["help request is not assigned"],
+    });
+  } finally {
+    db.query = originalQuery;
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("returns conflict when a help request is already resolved", async () => {
+  const originalQuery = db.query;
+  const queryResults = [
+    { rows: [] },
+    { rows: [{ status: "resolved" }] },
+  ];
+  db.query = async () => queryResults.shift();
+
+  const server = app.listen(0);
+
+  try {
+    const response = await request(
+      server,
+      "POST",
+      "/api/help-requests/550e8400-e29b-41d4-a716-446655440000/resolve",
+    );
+
+    assert.equal(response.statusCode, 409);
+    assert.deepEqual(response.body, {
+      errors: ["help request is not assigned"],
+    });
+  } finally {
+    db.query = originalQuery;
+    await new Promise((resolve) => server.close(resolve));
+  }
+});

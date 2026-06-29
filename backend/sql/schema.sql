@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS help_requests (
   volunteer_contact_method TEXT,
   volunteer_contact_value TEXT,
   assigned_at TIMESTAMPTZ,
+  resolved_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -22,7 +23,8 @@ ALTER TABLE help_requests
   ADD COLUMN IF NOT EXISTS volunteer_name TEXT,
   ADD COLUMN IF NOT EXISTS volunteer_contact_method TEXT,
   ADD COLUMN IF NOT EXISTS volunteer_contact_value TEXT,
-  ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
+  ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ;
 
 DO $$
 BEGIN
@@ -81,6 +83,17 @@ BEGIN
         (status IN ('assigned', 'resolved') AND volunteer_name IS NOT NULL
           AND volunteer_contact_method IS NOT NULL AND volunteer_contact_value IS NOT NULL
           AND assigned_at IS NOT NULL)
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'help_requests_resolution_check'
+  ) THEN
+    ALTER TABLE help_requests
+      ADD CONSTRAINT help_requests_resolution_check CHECK (
+        (status = 'resolved' AND resolved_at IS NOT NULL)
+        OR
+        (status IN ('open', 'assigned') AND resolved_at IS NULL)
       );
   END IF;
 END $$;

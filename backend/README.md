@@ -41,6 +41,7 @@ npm start
 - `GET /api/help-requests`
 - `POST /api/help-requests`
 - `POST /api/help-requests/:id/accept`
+- `POST /api/help-requests/:id/resolve`
 
 ## Geolocalizacion en listado
 
@@ -84,6 +85,17 @@ Respuestas:
 - `400` si el `id` o el payload son invalidos
 - `404` si la solicitud no existe
 - `409` si la solicitud ya no esta disponible
+
+## Resolver solicitud
+
+`POST /api/help-requests/:id/resolve` marca una solicitud como resuelta solo si sigue en estado `assigned`.
+
+Respuestas:
+
+- `200` si la solicitud se cierra correctamente
+- `400` si el `id` es invalido
+- `404` si la solicitud no existe
+- `409` si la solicitud no esta asignada o ya fue resuelta
 
 ## Ejemplo de payload
 
