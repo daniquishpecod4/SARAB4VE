@@ -1,15 +1,19 @@
 const { Pool } = require("pg");
 const { databaseUrl } = require("./config");
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required");
-}
-
-const pool = new Pool({
-  connectionString: databaseUrl,
-});
+const pool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+    })
+  : null;
 
 module.exports = {
-  query: (text, params) => pool.query(text, params),
+  query: (text, params) => {
+    if (!pool) {
+      throw new Error("DATABASE_URL is required");
+    }
+
+    return pool.query(text, params);
+  },
   close: () => pool.end(),
 };
