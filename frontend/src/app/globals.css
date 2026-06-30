@@ -31,6 +31,14 @@
   --color-on-error:                   #ffffff;
   --color-on-error-container:         #93000a;
 
+  --color-warning:                    #8b5000;
+  --color-warning-container:          #ffdcc1;
+  --color-on-warning-container:       #2d1600;
+
+  --color-success:                    #1f6a39;
+  --color-success-container:          #d3f8df;
+  --color-on-success-container:       #00210f;
+
   --color-background:                 #fcf9f8;
   --color-on-background:              #1c1b1b;
   --color-surface:                    #fcf9f8;
@@ -97,4 +105,13 @@ a, button {
 :focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+@keyframes toastShrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }

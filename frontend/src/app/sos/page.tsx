@@ -1,53 +1,138 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CategoryCard from "@/components/ui/CategoryCard";
+import ApplicantForm, { type SOSFormValues } from "./components/ApplicantForm";
+import { alertService } from "@/services/alertService";
+import { sendHelpRequest } from "@/api/helpRequests";
 
 const categories = [
   {
-    id: "medica",
-    icon: "medical_services",
-    title: "Asistencia Médica",
-    description: "Primeros auxilios, medicinas urgentes o traslado médico accesible.",
-  },
-  {
-    id: "movilidad",
+    id: "equipment",
     icon: "accessible",
-    title: "Ayuda de Movilidad",
-    description: "Sillas de ruedas, muletas o apoyo físico para evacuación segura.",
+    title: "Equipamiento",
+    description: "Sillas de ruedas, muletas, bastones, audífonos, etc.",
   },
   {
-    id: "alimento",
-    icon: "restaurant",
-    title: "Agua y Alimento",
-    description: "Suministros básicos adaptados a necesidades dietéticas específicas.",
+    id: "medication",
+    icon: "medical_services",
+    title: "Medicación",
+    description: "Medicamentos recetados o de emergencia.",
   },
   {
-    id: "refugio",
-    icon: "night_shelter",
-    title: "Refugio Seguro",
-    description: "Espacios con accesibilidad garantizada para pernocta o resguardo.",
+    id: "transport",
+    icon: "directions_car",
+    title: "Transporte",
+    description: "Traslado accesible a centros de salud, refugios u otros destinos.",
   },
   {
-    id: "psicosocial",
+    id: "companionship",
+    icon: "groups",
+    title: "Acompañamiento",
+    description: "Apoyo presencial o remoto para personas con discapacidad.",
+  },
+  {
+    id: "interpreter",
+    icon: "translate",
+    title: "Intérpretes",
+    description: "Interpretación en lengua de señas u otros idiomas.",
+  },
+  {
+    id: "accessible_information",
+    icon: "info",
+    title: "Información Accesible",
+    description: "Material en braille, lectura fácil, audio, lengua de señas.",
+  },
+  {
+    id: "neurodivergent_support",
     icon: "psychiatry",
-    title: "Apoyo Psicosocial",
-    description: "Intervención en crisis, apoyo emocional o comunicación asistida.",
-  },
-  {
-    id: "otro",
-    icon: "help_center",
-    title: "Otro Apoyo",
-    description: "Describe una necesidad específica no listada anteriormente.",
+    title: "Apoyo para Personas Neurodivergentes",
+    description: "Entornos tranquilos, comunicación clara y ajustes sensoriales.",
   },
 ];
 
 export default function SOSPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
+  const [step, setStep] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState<SOSFormValues>({
+    requester_name: "",
+    contact_method: "phone",
+    contact_value: "",
+    need_type: "",
+    description: "",
+    urgency: "medium",
+    address: "",
+    people: 1,
+  });
   // Step 1 only selects category; Step 2 (`/sos/ubicacion`) will collect details.
+
+  const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm((current) => ({ ...current, [name]: name === "people" ? Number(value) : value }));
+  };
+
+  const getCurrentPosition = () => {
+    return new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
+      if (!navigator?.geolocation) return reject(new Error("Geolocation no disponible"));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        (err) => reject(err),
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    });
+  };
+
+  const getErrorMessage = (error: unknown) => {
+    if (error instanceof Error) return error.message;
+    return "Por favor intenta de nuevo.";
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!form.requester_name || !form.contact_method || !form.contact_value || !form.need_type) {
+      alertService.warning("Por favor completa los campos requeridos.");
+      setLoading(false);
+      return;
+    }
+
+    let latitude: number | null = null;
+    let longitude: number | null = null;
+    try {
+      const pos = await getCurrentPosition();
+      latitude = pos.latitude;
+      longitude = pos.longitude;
+    } catch (error) {
+      console.warn("No se pudo obtener geolocalización:", error);
+      alertService.info("No pudimos obtener tu ubicación exacta. La solicitud se enviará con la dirección que escribiste.");
+    }
+
+    const payload = {
+      requesterName: form.requester_name,
+      contactMethod: form.contact_method,
+      contactValue: form.contact_value,
+      needType: form.need_type,
+      description: form.description,
+      latitude,
+      longitude,
+      urgency: form.urgency,
+    };
+
+    try {
+      await sendHelpRequest(payload);
+      alertService.success("Solicitud enviada. Gracias.");
+      router.push("/");
+    } catch (error) {
+      alertService.error(`Error al enviar la solicitud: ${getErrorMessage(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-5 lg:px-10 py-8 lg:py-12">
@@ -60,11 +145,11 @@ export default function SOSPage() {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-6">
-        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-on-primary text-xs font-bold">1</div>
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${step === 1 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>1</div>
         <div className="flex-1 h-1 rounded-full bg-outline-variant">
-          <div className="w-0 h-full rounded-full bg-primary" />
+          <div className={`h-full rounded-full ${step > 1 ? 'w-full bg-primary' : 'w-0'}`} />
         </div>
-        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-bold">2</div>
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${step === 2 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>2</div>
       </div>
 
       {/* Header */}
@@ -74,53 +159,71 @@ export default function SOSPage() {
             <span className="material-symbols-rounded text-on-secondary text-xl" aria-hidden="true">emergency_home</span>
           </div>
           <div>
-            <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Paso 1 de 2</p>
-            <h1 className="text-2xl font-bold text-on-surface">¿Qué necesitas ahora mismo?</h1>
+            <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Paso {step} de 2</p>
+            <h1 className="text-2xl font-bold text-on-surface">{step === 1 ? '¿Qué necesitas ahora mismo?' : 'Ubicación y detalles'}</h1>
           </div>
         </div>
         <p className="text-on-surface-variant">
-          Selecciona el tipo de apoyo que requieres. Esto nos ayudará a conectar
-          con el recurso adecuado de forma urgente.
+          {step === 1
+            ? 'Selecciona el tipo de apoyo que requieres. Esto nos ayudará a conectar con el recurso adecuado de forma urgente.'
+            : 'Proporciona la ubicación y detalles de la solicitud para que podamos enviar ayuda lo antes posible.'}
         </p>
       </div>
 
-      {/* Categories */}
-      <div className="flex flex-col gap-3">
-        {categories.map((cat) => (
-          <CategoryCard
-            key={cat.id}
-            icon={cat.icon}
-            title={cat.title}
-            description={cat.description}
-            selected={selected === cat.id}
-            onClick={() => setSelected(cat.id)}
-          />
-        ))}
-      </div>
+      {step === 1 && (
+        <>
+          {/* Categories */}
+          <div className="flex flex-col gap-3">
+            {categories.map((cat) => (
+              <CategoryCard
+                key={cat.id}
+                icon={cat.icon}
+                title={cat.title}
+                description={cat.description}
+                selected={selected === cat.id}
+                onClick={() => setSelected(cat.id)}
+              />
+            ))}
+          </div>
 
-      {/* Actions: navegar a paso 2 (Ubicación y Detalles) */}
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={() => {
-            if (!selected) {
-              alert("Selecciona primero un tipo de necesidad.");
-              return;
-            }
-            router.push(`/sos/location?need_type=${encodeURIComponent(selected)}`);
-          }}
-          className="flex-1 flex items-center justify-center gap-2 bg-secondary-container text-on-secondary px-6 py-4 rounded-full font-bold text-base hover:opacity-90 transition-opacity focus-visible:outline-3 focus-visible:outline-primary"
-        >
-          Continuar
-          <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
-        </button>
-        <Link
-          href="/"
-          className="flex-1 flex items-center justify-center gap-2 border border-outline text-on-surface px-6 py-4 rounded-full font-semibold text-base hover:bg-surface-container transition-colors focus-visible:outline-3 focus-visible:outline-primary"
-        >
-          <span className="material-symbols-rounded text-lg" aria-hidden="true">close</span>
-          Cancelar Solicitud
-        </Link>
-      </div>
+          {/* Actions: pasar a paso 2 (Ubicación y Detalles) */}
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/"
+              className="flex-1 flex items-center justify-center gap-2 border border-outline text-on-surface px-6 py-4 rounded-full font-semibold text-base hover:bg-surface-container transition-colors focus-visible:outline-3 focus-visible:outline-primary"
+            >
+              <span className="material-symbols-rounded text-lg" aria-hidden="true">close</span>
+              Cancelar Solicitud
+            </Link>
+            <button
+              onClick={() => {
+                if (!selected) {
+                  alertService.warning("Selecciona primero un tipo de necesidad.");
+                  return;
+                }
+                setForm((current) => ({ ...current, need_type: selected }));
+                setStep(2);
+              }}
+              className="flex-1 flex items-center justify-center gap-2 bg-secondary-container text-on-secondary px-6 py-4 rounded-full font-bold text-base hover:opacity-90 transition-opacity focus-visible:outline-3 focus-visible:outline-primary"
+            >
+              Continuar
+              <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {step === 2 && (
+        <div className="mt-4">
+          <ApplicantForm
+            form={form}
+            onChange={handleFormChange}
+            onSubmit={handleSubmit}
+            loading={loading}
+            onBack={() => setStep(1)}
+          />
+        </div>
+      )}
 
       {/* Nearby banner */}
       <div className="mt-8 rounded-2xl bg-primary-fixed border border-outline-variant p-4 flex items-start gap-3">
