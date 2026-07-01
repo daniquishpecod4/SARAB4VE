@@ -49,13 +49,25 @@ export default function HomePage() {
               Pulsa el botón central para alertar a los equipos de emergencia cercanos.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            {/* Boton SOS de Emergencia */}
+            <div className="mt-8 flex justify-center">
               <Link
                 href="/sos"
+                className="flex items-center justify-center gap-3 bg-error text-on-error px-10 py-5 rounded-full font-extrabold text-2xl shadow-2xl hover:opacity-90 transition-all hover:scale-110 active:scale-100 focus-visible:outline-3 focus-visible:outline-error border-2 border-error-container animate-pulse"
+              >
+                <span className="material-symbols-rounded text-4xl" aria-hidden="true">emergency</span>
+                SOS — Emergencia
+              </Link>
+            </div>
+
+            <div className="mt-8 mx-2 lg:mx-1 flex flex-col sm:flex-row gap-3 justify-center lg:justify-around">
+              {/* Boton de Solicitud de Apoyo */}
+              <Link
+                href="/request"
                 className="flex items-center justify-center gap-3 bg-secondary-container text-on-secondary px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:opacity-90 transition-all hover:scale-[1.02] active:scale-100 focus-visible:outline-3 focus-visible:outline-primary"
               >
                 <span className="material-symbols-rounded text-2xl" aria-hidden="true">crisis_alert</span>
-                NECESITO AYUDA
+                Solicitar Apoyo
               </Link>
               <Link
                 href="/mapa"
