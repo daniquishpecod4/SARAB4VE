@@ -38,7 +38,46 @@ const USER_DETAILS_SELECT_COLUMNS = `
   terms_accepted_at AS "termsAcceptedAt",
   approved_by AS "approvedBy",
   approved_at AS "approvedAt",
-  updated_at AS "updatedAt"
+  updated_at AS "updatedAt",
+
+  -- Campos de Organizaciones
+  country_fiscal AS "countryFiscal",
+  fiscal_id_type AS "fiscalIdType",
+  fiscal_number AS "fiscalNumber",
+  entity_type AS "entityType",
+  other_entity_type AS "otherEntityType",
+  registration_number AS "registrationNumber",
+  constitution_date AS "constitutionDate",
+  legal_address AS "legalAddress",
+  legal_country AS "legalCountry",
+  province AS "province",
+  city AS "city",
+  legal_representative_name AS "legalRepresentativeName",
+  legal_representative_position AS "legalRepresentativePosition",
+  legal_representative_phone AS "legalRepresentativePhone",
+  legal_representative_email AS "legalRepresentativeEmail",
+  website AS "website",
+  social_media AS "socialMedia",
+  mission AS "mission",
+  vision AS "vision",
+  scope AS "scope",
+  collective_served AS "collectiveServed",
+  disability_types AS "disabilityTypes",
+  services AS "services",
+
+  -- Campos de Voluntarios
+  document_number AS "documentNumber",
+  birth_date AS "birthDate",
+  address AS "address",
+  volunteer_type AS "volunteerType",
+  profession AS "profession",
+  languages AS "languages",
+  experience_categories AS "experienceCategories",
+  schedule_hours AS "scheduleHours",
+  modality_presential AS "modalityPresential",
+  modality_online AS "modalityOnline",
+  interest_areas AS "interestAreas",
+  has_prior_experience AS "hasPriorExperience"
 `;
 
 // ---------------------------------------------------------------------------

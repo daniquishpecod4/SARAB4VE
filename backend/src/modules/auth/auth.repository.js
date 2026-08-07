@@ -25,6 +25,8 @@ const USER_SELECT_COLUMNS = `
   updated_at AS "updatedAt"
 `;
 
+
+
 /** Columnas de user_details. */
 const USER_DETAILS_SELECT_COLUMNS = `
   skills,
@@ -37,7 +39,46 @@ const USER_DETAILS_SELECT_COLUMNS = `
   terms_accepted_at AS "termsAcceptedAt",
   approved_by AS "approvedBy",
   approved_at AS "approvedAt",
-  updated_at AS "updatedAt"
+  updated_at AS "updatedAt",
+
+  -- Campos de Organizaciones
+  country_fiscal AS "countryFiscal",
+  fiscal_id_type AS "fiscalIdType",
+  fiscal_number AS "fiscalNumber",
+  entity_type AS "entityType",
+  other_entity_type AS "otherEntityType",
+  registration_number AS "registrationNumber",
+  constitution_date AS "constitutionDate",
+  legal_address AS "legalAddress",
+  legal_country AS "legalCountry",
+  province AS "province",
+  city AS "city",
+  legal_representative_name AS "legalRepresentativeName",
+  legal_representative_position AS "legalRepresentativePosition",
+  legal_representative_phone AS "legalRepresentativePhone",
+  legal_representative_email AS "legalRepresentativeEmail",
+  website AS "website",
+  social_media AS "socialMedia",
+  mission AS "mission",
+  vision AS "vision",
+  scope AS "scope",
+  collective_served AS "collectiveServed",
+  disability_types AS "disabilityTypes",
+  services AS "services",
+
+  -- Campos de Voluntarios
+  document_number AS "documentNumber",
+  birth_date AS "birthDate",
+  address AS "address",
+  volunteer_type AS "volunteerType",
+  profession AS "profession",
+  languages AS "languages",
+  experience_categories AS "experienceCategories",
+  schedule_hours AS "scheduleHours",
+  modality_presential AS "modalityPresential",
+  modality_online AS "modalityOnline",
+  interest_areas AS "interestAreas",
+  has_prior_experience AS "hasPriorExperience"
 `;
 
 // ---------------------------------------------------------------------------
@@ -112,9 +153,52 @@ const INSERT_USER_DETAILS = `
     legal_document,
     work_area,
     accepted_terms,
-    terms_accepted_at
+    terms_accepted_at,
+
+    -- Campos de Organizaciones
+    country_fiscal,
+    fiscal_id_type,
+    fiscal_number,
+    entity_type,
+    other_entity_type,
+    registration_number,
+    constitution_date,
+    legal_address,
+    legal_country,
+    province,
+    city,
+    legal_representative_name,
+    legal_representative_position,
+    legal_representative_phone,
+    legal_representative_email,
+    website,
+    social_media,
+    mission,
+    vision,
+    scope,
+    collective_served,
+    disability_types,
+    services,
+
+    -- Campos de Voluntarios
+    document_number,
+    birth_date,
+    address,
+    volunteer_type,
+    profession,
+    languages,
+    experience_categories,
+    schedule_hours,
+    modality_presential,
+    modality_online,
+    interest_areas,
+    has_prior_experience
   )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+  VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, NOW(),
+    $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
+    $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42
+  )
   RETURNING ${USER_DETAILS_SELECT_COLUMNS}
 `;
 
@@ -123,13 +207,6 @@ const INSERT_USER_DETAILS = `
  * @param {import("pg").PoolClient} client — Cliente de transacción
  * @param {string} userId — UUID del usuario recién creado
  * @param {Object} details — Payload normalizado de detalles
- * @param {string[]} [details.skills]
- * @param {number} [details.availableHours]
- * @param {string[]} [details.availableDays]
- * @param {string} [details.organizationName]
- * @param {string} [details.legalDocument]
- * @param {string[]} [details.workArea]
- * @param {boolean} details.acceptedTerms
  * @returns {Promise<Object>} — Fila insertada
  */
 async function insertUserDetails(client, userId, details) {
@@ -142,6 +219,45 @@ async function insertUserDetails(client, userId, details) {
     details.legalDocument || null,
     details.workArea || null,
     details.acceptedTerms,
+
+    // Campos de Organizaciones
+    details.countryFiscal || null,
+    details.fiscalIdType || null,
+    details.fiscalNumber || null,
+    details.entityType || null,
+    details.otherEntityType || null,
+    details.registrationNumber || null,
+    details.constitutionDate || null,
+    details.legalAddress || null,
+    details.legalCountry || null,
+    details.province || null,
+    details.city || null,
+    details.legalRepresentativeName || null,
+    details.legalRepresentativePosition || null,
+    details.legalRepresentativePhone || null,
+    details.legalRepresentativeEmail || null,
+    details.website || null,
+    details.socialMedia || null,
+    details.mission || null,
+    details.vision || null,
+    details.scope || null,
+    details.collectiveServed || null,
+    details.disabilityTypes || null,
+    details.services || null,
+
+    // Campos de Voluntarios
+    details.documentNumber || null,
+    details.birthDate || null,
+    details.address || null,
+    details.volunteerType || null,
+    details.profession || null,
+    details.languages || null,
+    details.experienceCategories || null,
+    details.scheduleHours || null,
+    details.modalityPresential || false,
+    details.modalityOnline || false,
+    details.interestAreas || null,
+    details.hasPriorExperience !== undefined ? details.hasPriorExperience : null
   ]);
 
   return result.rows[0];

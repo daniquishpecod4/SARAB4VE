@@ -142,6 +142,34 @@ const RegisterVolunteerBody = CommonFields.extend({
   acceptedTerms: z.literal(true, {
     errorMap: () => ({ message: "acceptedTerms debe ser true para registrarse como voluntario" }),
   }).openapi({ example: true, description: "Debe ser true" }),
+
+  // Nuevos campos de voluntarios
+  documentNumber: z.string().min(1, "documentNumber es requerido")
+    .openapi({ example: "12345678A", description: "Número de documento de identidad" }),
+  birthDate: z.string().min(1, "birthDate es requerida")
+    .openapi({ example: "1990-05-15", description: "Fecha de nacimiento (YYYY-MM-DD)" }),
+  address: z.string().min(1, "address es requerida")
+    .openapi({ example: "Calle Falsa 123", description: "Dirección de residencia" }),
+  volunteerType: z.enum(["professional", "non_professional"])
+    .openapi({ example: "professional", description: "Tipo de voluntario" }),
+  profession: z.string().optional()
+    .openapi({ example: "Médico", description: "Profesión o formación (opcional)" }),
+  languages: z.array(z.string()).optional()
+    .openapi({ example: ["Español", "Inglés"], description: "Idiomas (opcional)" }),
+  experienceCategories: z.array(z.string()).optional()
+    .openapi({ example: ["salud", "atencion_emergencias"], description: "Categorías de experiencia (opcional)" }),
+  scheduleHours: z.array(z.number())
+    .min(1, "scheduleHours debe contener al menos un bloque horario")
+    .openapi({ example: [1, 2], description: "IDs de bloques horarios de disponibilidad" }),
+  modalityPresential: z.boolean()
+    .openapi({ example: true, description: "Disponibilidad presencial" }),
+  modalityOnline: z.boolean()
+    .openapi({ example: false, description: "Disponibilidad remota/online" }),
+  interestAreas: z.array(z.string())
+    .min(1, "interestAreas debe contener al menos un área de interés")
+    .openapi({ example: ["salud", "rescate"], description: "Áreas de interés" }),
+  hasPriorExperience: z.boolean().nullable().optional()
+    .openapi({ example: true, description: "Si tiene experiencia previa en voluntariado" }),
 }).openapi({
   description: "Payload para registrar un voluntario (requiere aprobación)",
   example: {
@@ -151,9 +179,21 @@ const RegisterVolunteerBody = CommonFields.extend({
     password: "claveSegura2024!",
     location: { lat: 10.4806, lng: -66.9036 },
     zone: "Caracas - Zona 1",
+    documentNumber: "12345678A",
+    birthDate: "1990-05-15",
+    address: "Calle Falsa 123",
+    volunteerType: "professional",
+    profession: "Médico",
     skills: ["primeros_auxilios", "logistica"],
     availableHours: 20,
     availableDays: ["lunes", "miercoles", "sabado"],
+    scheduleHours: [1, 2],
+    modalityPresential: true,
+    modalityOnline: false,
+    interestAreas: ["salud", "rescate"],
+    languages: ["Español", "Inglés"],
+    experienceCategories: ["salud", "atencion_emergencias"],
+    hasPriorExperience: true,
     acceptedTerms: true,
   },
 });
@@ -181,6 +221,54 @@ const RegisterOrganizationBody = CommonFields.extend({
   acceptedTerms: z.literal(true, {
     errorMap: () => ({ message: "acceptedTerms debe ser true para registrarse como organización" }),
   }).openapi({ example: true, description: "Debe ser true" }),
+
+  // Nuevos campos de organización
+  countryFiscal: z.string().min(1, "countryFiscal es requerido")
+    .openapi({ example: "Venezuela", description: "País emisor del identificador fiscal" }),
+  fiscalIdType: z.string().min(1, "fiscalIdType es requerido")
+    .openapi({ example: "RIF", description: "Tipo de identificador fiscal" }),
+  fiscalNumber: z.string().min(1, "fiscalNumber es requerido")
+    .openapi({ example: "J-12345678-9", description: "Número de identificación fiscal" }),
+  entityType: z.string().min(1, "entityType es requerido")
+    .openapi({ example: "Asociación", description: "Tipo de entidad" }),
+  otherEntityType: z.string().optional()
+    .openapi({ example: "ONG internacional", description: "Otro tipo de entidad si aplica" }),
+  registrationNumber: z.number().int().min(1, "registrationNumber es requerido")
+    .openapi({ example: 4567, description: "Número de registro legal" }),
+  constitutionDate: z.string().min(1, "constitutionDate es requerida")
+    .openapi({ example: "1980-04-12", description: "Fecha de constitución (YYYY-MM-DD)" }),
+  legalAddress: z.string().min(1, "legalAddress es requerida")
+    .openapi({ example: "Av. Fuerzas Armadas, Caracas", description: "Dirección legal" }),
+  legalCountry: z.string().min(1, "legalCountry es requerido")
+    .openapi({ example: "Venezuela", description: "País de registro legal" }),
+  province: z.string().min(1, "province es requerida")
+    .openapi({ example: "Distrito Capital", description: "Provincia o estado" }),
+  city: z.string().min(1, "city es requerida")
+    .openapi({ example: "Caracas", description: "Ciudad" }),
+  legalRepresentativeName: z.string().min(1, "legalRepresentativeName es requerido")
+    .openapi({ example: "Juan Pérez", description: "Nombre del representante legal" }),
+  legalRepresentativePosition: z.string().min(1, "legalRepresentativePosition es requerido")
+    .openapi({ example: "Director General", description: "Cargo del representante legal" }),
+  legalRepresentativePhone: z.string().min(1, "legalRepresentativePhone es requerido")
+    .openapi({ example: "+584241234567", description: "Teléfono del representante legal" }),
+  legalRepresentativeEmail: z.string().email("legalRepresentativeEmail inválido")
+    .openapi({ example: "juan.perez@cruzroja.org.ve", description: "Email del representante legal" }),
+  website: z.string().optional()
+    .openapi({ example: "https://cruzroja.org.ve", description: "Sitio web de la organización" }),
+  socialMedia: z.string().optional()
+    .openapi({ example: "@cruzrojave", description: "Redes sociales de la organización" }),
+  mission: z.string().min(1, "mission es requerida")
+    .openapi({ example: "Aliviar el sufrimiento humano...", description: "Misión institucional" }),
+  vision: z.string().min(1, "vision es requerida")
+    .openapi({ example: "Ser líderes en la asistencia humanitaria...", description: "Visión institucional" }),
+  scope: z.string().min(1, "scope es requerido")
+    .openapi({ example: "Nacional", description: "Ámbito de acción territorial" }),
+  collectiveServed: z.string().min(1, "collectiveServed es requerido")
+    .openapi({ example: "Personas con discapacidad y adultos mayores", description: "Colectivo atendido" }),
+  disabilityTypes: z.array(z.string()).min(1, "disabilityTypes debe contener al menos un tipo")
+    .openapi({ example: ["visual", "motora"], description: "Tipos de discapacidad que atienden" }),
+  services: z.string().min(1, "services es requerido")
+    .openapi({ example: "Atención médica, talleres de capacitación...", description: "Servicios prestados" }),
 }).openapi({
   description: "Payload para registrar una organización (requiere aprobación)",
   example: {
@@ -194,6 +282,29 @@ const RegisterOrganizationBody = CommonFields.extend({
     legalDocument: "RIF-J-12345678-9",
     workArea: ["salud", "logistica"],
     acceptedTerms: true,
+    countryFiscal: "Venezuela",
+    fiscalIdType: "RIF",
+    fiscalNumber: "J-12345678-9",
+    entityType: "Asociación",
+    otherEntityType: "ONG nacional",
+    registrationNumber: 4567,
+    constitutionDate: "1980-04-12",
+    legalAddress: "Av. Fuerzas Armadas, Caracas",
+    legalCountry: "Venezuela",
+    province: "Distrito Capital",
+    city: "Caracas",
+    legalRepresentativeName: "Juan Pérez",
+    legalRepresentativePosition: "Director General",
+    legalRepresentativePhone: "+582121234568",
+    legalRepresentativeEmail: "juan.perez@cruzroja.org.ve",
+    website: "https://cruzroja.org.ve",
+    socialMedia: "@cruzrojave",
+    mission: "Brindar apoyo humanitario y atención a la comunidad vulnerable.",
+    vision: "Ser una red de respuesta efectiva y solidaria en todo el país.",
+    scope: "Nacional",
+    collectiveServed: "Personas con discapacidad y adultos mayores",
+    disabilityTypes: ["visual", "motora"],
+    services: "Atención médica, capacitación y logística de emergencia",
   },
 });
 
@@ -324,6 +435,18 @@ function normalizeRegisterVolunteer(payload) {
       availableHours: Number(payload.availableHours),
       availableDays: payload.availableDays.map((d) => d.toLowerCase().trim()),
       acceptedTerms: true,
+      documentNumber: payload.documentNumber.trim(),
+      birthDate: payload.birthDate,
+      address: payload.address.trim(),
+      volunteerType: payload.volunteerType,
+      profession: payload.profession?.trim() || null,
+      languages: payload.languages?.map((l) => l.trim()) || null,
+      experienceCategories: payload.experienceCategories?.map((c) => c.trim()) || null,
+      scheduleHours: payload.scheduleHours,
+      modalityPresential: payload.modalityPresential,
+      modalityOnline: payload.modalityOnline,
+      interestAreas: payload.interestAreas.map((i) => i.trim()),
+      hasPriorExperience: payload.hasPriorExperience,
     },
   };
 }
@@ -350,6 +473,29 @@ function normalizeRegisterOrganization(payload) {
       legalDocument: payload.legalDocument.trim(),
       workArea: payload.workArea?.map((a) => a.trim()) || null,
       acceptedTerms: true,
+      countryFiscal: payload.countryFiscal.trim(),
+      fiscalIdType: payload.fiscalIdType.trim(),
+      fiscalNumber: payload.fiscalNumber.trim(),
+      entityType: payload.entityType.trim(),
+      otherEntityType: payload.otherEntityType?.trim() || null,
+      registrationNumber: Number(payload.registrationNumber),
+      constitutionDate: payload.constitutionDate,
+      legalAddress: payload.legalAddress.trim(),
+      legalCountry: payload.legalCountry.trim(),
+      province: payload.province.trim(),
+      city: payload.city.trim(),
+      legalRepresentativeName: payload.legalRepresentativeName.trim(),
+      legalRepresentativePosition: payload.legalRepresentativePosition.trim(),
+      legalRepresentativePhone: payload.legalRepresentativePhone.trim(),
+      legalRepresentativeEmail: payload.legalRepresentativeEmail.trim().toLowerCase(),
+      website: payload.website?.trim() || null,
+      socialMedia: payload.socialMedia?.trim() || null,
+      mission: payload.mission.trim(),
+      vision: payload.vision.trim(),
+      scope: payload.scope.trim(),
+      collectiveServed: payload.collectiveServed.trim(),
+      disabilityTypes: payload.disabilityTypes.map((t) => t.trim()),
+      services: payload.services.trim(),
     },
   };
 }
